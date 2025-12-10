@@ -6,8 +6,17 @@ const public_users = express.Router();
 
 
 public_users.post("/register", (req, res) => {
-    //Write your code here
-    return res.status(300).json({ message: "Yet to be implemented" });
+    const { username, password } = req.body;
+    const userExists = users.some(user => user.username === username);
+    
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+    }
+    else if (userExists) {
+        return res.status(409).json({ message: "Username already exists" });
+    }
+    users.push({ username, password });
+    return res.status(201).json({ message: "User registered successfully" });
 });
 
 // Get the book list available in the shop
@@ -82,17 +91,12 @@ public_users.get('/title/:title', async function (req, res) {
 
 //  Get book review
 public_users.get('/review/:isbn', async function (req, res) {
-    // const response = await new Promise((resolve, reject) => {
-    //     const isbn = req.params.isbn;
-    //     if (books[isbn]) {
-    //         resolve({ data: books[isbn].reviews });
-    //     } else {
-    //         reject(new Error(`No Book with ISBN ${isbn} found`));
-    //     }
-    // });
-
-    // return res.status(200).json({ message: JSON.stringify(response.data, null, 4) });
-
+    const isbn = req.params.isbn; 
+    if (books[isbn]) {
+        return res.status(200).send({ message: JSON.stringify(books[isbn].reviews, null, 4) });
+    } else {
+        return res.status(404).json({ message: `No book with ISBN ${isbn} found` });
+    }
 });
 
 module.exports.general = public_users;
